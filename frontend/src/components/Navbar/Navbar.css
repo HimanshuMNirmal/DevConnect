@@ -1,0 +1,298 @@
+:root {
+  /* Primary Colors */
+  --color-primary: #667eea;
+  --color-primary-dark: #764ba2;
+  --color-primary-light: #8b9ef5;
+
+  /* Secondary Colors */
+  --color-secondary: #f093fb;
+  --color-secondary-dark: #d945ef;
+
+  /* Neutral Colors */
+  --color-white: #ffffff;
+  --color-light-gray: #f5f5f5;
+  --color-gray: #e0e0e0;
+  --color-dark-gray: #999999;
+  --color-dark-text: #333333;
+  --color-medium-text: #555555;
+  --color-light-text: #666666;
+
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-error-light: #f8d7da;
+  --color-error-dark: #721c24;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+
+  /* Backgrounds */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f5f5f5;
+  --color-bg-tertiary: #fafafa;
+
+  /* Borders */
+  --color-border: #dddddd;
+  --color-border-light: #eeeeee;
+
+  /* Shadows */
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-color-dark: rgba(0, 0, 0, 0.15);
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-xxl: 24px;
+  --spacing-xxxl: 32px;
+  --spacing-huge: 40px;
+
+  /* Border Radius */
+  --radius-xs: 4px;
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-full: 50%;
+
+  /* Font Sizes */
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-xxl: 24px;
+  --font-size-xxxl: 28px;
+  --font-size-huge: 32px;
+
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease-in-out;
+  --transition-base: 0.3s ease-in-out;
+  --transition-slow: 0.5s ease-in-out;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #d945ef 100%);
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--color-bg-primary);
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-lg) var(--spacing-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.navbar-logo {
+  font-size: var(--font-size-huge);
+  font-weight: var(--font-weight-bold);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.navbar-logo:hover {
+  opacity: 0.8;
+}
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: var(--font-size-xxl);
+  cursor: pointer;
+  color: var(--color-dark-text);
+  padding: var(--spacing-sm);
+  transition: color var(--transition-base);
+}
+
+.hamburger:hover {
+  color: var(--color-primary);
+}
+
+.navbar-menu {
+  display: flex;
+  gap: var(--spacing-xl);
+  align-items: center;
+}
+
+.nav-link {
+  color: var(--color-light-text);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-base);
+  padding: var(--spacing-sm) 0;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-link:hover {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.nav-link.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.nav-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border-light);
+}
+
+.user-info {
+  color: var(--color-light-text);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  padding: 0 var(--spacing-md);
+}
+
+.logout-btn {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--gradient-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: opacity var(--transition-base);
+}
+
+.logout-btn:hover {
+  opacity: 0.9;
+}
+
+.register-btn {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--gradient-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: opacity var(--transition-base);
+}
+
+.register-btn:hover {
+  opacity: 0.9;
+}
+
+.messages-link {
+  position: relative;
+}
+
+.unread-badge {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  background: #ff4444;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: bold;
+  border: 2px solid var(--color-bg-primary);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
+  .navbar-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-bg-primary);
+    flex-direction: column;
+    gap: 0;
+    padding: var(--spacing-lg);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition-base);
+    box-shadow: 0 4px 12px var(--shadow-color);
+  }
+
+  .navbar-menu.open {
+    max-height: 500px;
+  }
+
+  .nav-link {
+    width: 100%;
+    padding: var(--spacing-md);
+    border-bottom: 2px solid transparent;
+  }
+
+  .nav-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--color-border-light);
+    margin: var(--spacing-md) 0;
+  }
+
+  .user-info {
+    width: 100%;
+    padding: var(--spacing-md);
+    text-align: center;
+  }
+
+  .logout-btn,
+  .register-btn {
+    width: 100%;
+    display: block;
+    text-align: center;
+    margin-top: var(--spacing-md);
+  }
+
+  .navbar-menu.open .nav-link,
+  .navbar-menu.open .logout-btn,
+  .navbar-menu.open .register-btn,
+  .navbar-menu.open .user-info {
+    display: block;
+  }
+}

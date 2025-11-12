@@ -1,0 +1,7 @@
+# Prisma
+.env
+.env.*.local
+node_modules/
+dist/
+*.db
+*.sqlite

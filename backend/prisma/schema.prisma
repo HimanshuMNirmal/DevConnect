@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  username  String  @unique
+  email     String  @unique
+  password  String
+  bio       String?
+  skills    String?
+  profile_pic String?
+  createdAt DateTime @default(now())
+
+  posts     Post[]
+  comments  Comment[]
+  sentMessages Message[] @relation("Sender")
+  receivedMessages Message[] @relation("Receiver")
+  likes     PostLike[]
+
+  @@map("users")
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  title     String
+  content   String
+  tags      String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  likes     PostLike[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("posts")
+}
+
+model Comment {
+  id        Int     @id @default(autoincrement())
+  postId    Int
+  userId    Int
+  content   String
+  createdAt DateTime @default(now())
+
+  post      Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([userId])
+  @@map("comments")
+}
+
+model PostLike {
+  id        Int     @id @default(autoincrement())
+  postId    Int
+  userId    Int
+  createdAt DateTime @default(now())
+
+  post      Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@index([postId])
+  @@index([userId])
+  @@map("post_likes")
+}
+
+model Message {
+  id        Int     @id @default(autoincrement())
+  senderId  Int
+  receiverId Int
+  message   String
+  isRead    Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  sender    User    @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver  User    @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@map("messages")
+}

@@ -1,0 +1,86 @@
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e7f5ff 50%, #ffe3e3 100%);
+}
+
+.main-content {
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+.welcome-section {
+  text-align: center;
+  padding: var(--spacing-huge);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-xxxl);
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.welcome-section h2 {
+  color: white;
+  font-size: var(--font-size-huge);
+  margin-bottom: var(--spacing-md);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-section p {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: var(--font-size-md);
+  margin: var(--spacing-md) 0;
+  line-height: 1.6;
+}
+
+.welcome-section a {
+  color: #ffd700;
+  text-decoration: none;
+  font-weight: var(--font-weight-bold);
+  transition: all 0.3s ease;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+}
+
+.welcome-section a:hover {
+  background: rgba(255, 255, 255, 0.2);
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.footer {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  text-align: center;
+  padding: var(--spacing-xl);
+  margin-top: var(--spacing-xxxl);
+  font-size: var(--font-size-base);
+  border-top: 3px solid var(--color-primary);
+}
+
+.footer p {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: var(--spacing-md);
+  }
+
+  .welcome-section {
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+  }
+
+  .welcome-section h2 {
+    font-size: var(--font-size-xl);
+  }
+
+  .welcome-section p {
+    font-size: var(--font-size-base);
+  }
+}
