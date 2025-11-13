@@ -129,7 +129,7 @@ const getUserProfile = async (req, res) => {
 const updateUserProfile = async (req, res) => {
   try {
     const { id } = req.params;
-    const { bio, profile_pic } = req.body;
+    const { bio, skills, profile_pic } = req.body;
     const userId = req.user.id;
 
     // VALIDATE PROFILE ID
@@ -148,6 +148,7 @@ const updateUserProfile = async (req, res) => {
       where: { id: profileId },
       data: {
         bio: bio || undefined,
+        skills: skills || undefined,
         profile_pic: profile_pic || undefined
       },
       select: {
@@ -155,6 +156,7 @@ const updateUserProfile = async (req, res) => {
         username: true,
         email: true,
         bio: true,
+        skills: true,
         profile_pic: true
       }
     });
