@@ -9,10 +9,8 @@ const Chat = ({ userId }) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState(null);
-  const [chatUser, setChatUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [totalCount, setTotalCount] = useState(0);
   const messagesContainerRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const currentUser = JSON.parse(localStorage.getItem('user'));
@@ -31,53 +29,53 @@ const Chat = ({ userId }) => {
   // MARK SINGLE MESSAGE AS READ
   // Update message read status both locally and in backend
   // Also emit socket event to notify sender
-  const markMessageAsRead = async (messageId, messageData = null) => {
-    try {
-      let msg = messageData;
-      if (!msg) {
-        msg = messages.find(m => m.id === messageId);
-      }
+  // const markMessageAsRead = async (messageId, messageData = null) => {
+  //   try {
+  //     let msg = messageData;
+  //     if (!msg) {
+  //       msg = messages.find(m => m.id === messageId);
+  //     }
       
-      if (!msg) {
-        console.warn('Message not found for ID:', messageId);
-        return;
-      }
+  //     if (!msg) {
+  //       console.warn('Message not found for ID:', messageId);
+  //       return;
+  //     }
 
-      await messageAPI.markAsRead(messageId);
+  //     await messageAPI.markAsRead(messageId);
       
-      setMessages((prev) => {
-        const messageIndex = prev.findIndex(m => m.id === messageId);
+  //     setMessages((prev) => {
+  //       const messageIndex = prev.findIndex(m => m.id === messageId);
         
-        const updatedMessages = prev.map((m, index) => {
-          if (m.id === messageId) {
-            return { ...m, isRead: true };
-          }
+  //       const updatedMessages = prev.map((m, index) => {
+  //         if (m.id === messageId) {
+  //           return { ...m, isRead: true };
+  //         }
           
-          if (index < messageIndex && m.senderId === msg.senderId && !m.isRead) {
-            return { ...m, isRead: true };
-          }
+  //         if (index < messageIndex && m.senderId === msg.senderId && !m.isRead) {
+  //           return { ...m, isRead: true };
+  //         }
           
-          if (index < messageIndex && m.senderId === msg.senderId && m.isRead) {
-          }
+  //         if (index < messageIndex && m.senderId === msg.senderId && m.isRead) {
+  //         }
           
-          return m;
-        });
+  //         return m;
+  //       });
         
-        return updatedMessages;
-      });
+  //       return updatedMessages;
+  //     });
       
       
-      if (socket) {
-        socket.emit('markAsRead', {
-          messageId: messageId,
-          senderId: msg.senderId, 
-          readBy: currentUser?.id,     
-        });
-      }
-    } catch (err) {
-      console.error('Error marking message as read:', err);
-    }
-  };
+  //     if (socket) {
+  //       socket.emit('markAsRead', {
+  //         messageId: messageId,
+  //         senderId: msg.senderId, 
+  //         readBy: currentUser?.id,     
+  //       });
+  //     }
+  //   } catch (err) {
+  //     console.error('Error marking message as read:', err);
+  //   }
+  // };
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -91,7 +89,6 @@ const Chat = ({ userId }) => {
       setMessages(fetchedMessages.reverse());
       setCurrentPage(1);
       setHasMore(response.data?.pagination?.hasMore || false);
-      setTotalCount(response.data?.pagination?.totalCount || 0);
     } catch (err) {
       console.error('Error fetching messages:', err);
       setError('Failed to load messages');
@@ -148,7 +145,7 @@ const Chat = ({ userId }) => {
     try {
       // MARK ALL UNREAD MESSAGES FROM CONVERSATION PARTNER AS READ
       // Send request to backend to update read status for entire conversation
-      const response = await messageAPI.markConversationAsRead(userId);
+      await messageAPI.markConversationAsRead(userId);
       
       // UPDATE LOCAL STATE TO REFLECT READ STATUS
       setMessages((prev) => {
@@ -178,16 +175,18 @@ const Chat = ({ userId }) => {
     if (userId) {
       markAllConversationMessagesAsRead();
     }
-  }, [userId]);
+  }, [userId, markAllConversationMessagesAsRead]);
 
   useEffect(() => {
     fetchMessages();
+  }, [userId, fetchMessages]);
 
+  // SEPARATE EFFECT FOR SOCKET LISTENERS - ONLY DEPENDS ON SOCKET AND USERID
+  useEffect(() => {
     if (!socket) {
       console.warn('Socket not initialized');
       return;
     }
-
     const handleMessage = (data) => {
       if (data.senderId === parseInt(userId) || data.receiverId === parseInt(userId)) {
         
@@ -200,7 +199,21 @@ const Chat = ({ userId }) => {
         });
         
         if (data.senderId === parseInt(userId) && !data.isRead) {
-          markMessageAsRead(data.id, data);
+          // Mark as read using API
+          messageAPI.markAsRead(data.id).catch(err => console.error('Error marking as read:', err));
+          
+          // EMIT SOCKET EVENT TO NOTIFY SENDER THAT MESSAGE WAS READ
+          if (socket) {
+            socket.emit('markAsRead', {
+              messageId: data.id,
+              senderId: data.senderId,
+              readBy: currentUser?.id
+            });
+          }
+          
+          setMessages((prev) => 
+            prev.map((m) => m.id === data.id ? { ...m, isRead: true } : m)
+          );
         }
       } else {
       }
@@ -262,10 +275,14 @@ const Chat = ({ userId }) => {
 
     const handleConversationRead = (data) => {
       
-      if (data.conversationWith === parseInt(userId)) {
+      // When I receive this event, the other user (data.conversationWith) has read my messages
+      // OR I am the one who just marked the conversation as read
+      // In both cases, if data.conversationWith exists, it means messages in that conversation are read
+      if (parseInt(userId) === data.conversationWith || parseInt(userId) === data.readBy) {
         
         setMessages((prev) => {
           const updated = prev.map((msg) => {
+            // Mark my sent messages as read
             if (msg.senderId === currentUser?.id) {
               return { ...msg, isRead: true };
             }
@@ -284,6 +301,7 @@ const Chat = ({ userId }) => {
     socket.on('messageRead', handleMessageRead);
     socket.on('conversationRead', handleConversationRead);
 
+
     return () => {
       socket.off('message', handleMessage);
       socket.off('messageSent', handleMessageSent);
@@ -295,7 +313,7 @@ const Chat = ({ userId }) => {
         clearTimeout(typingTimeoutRef.current);
       }
     };
-  }, [userId, fetchMessages, socket]);
+  }, [userId, socket, currentUser?.id]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();

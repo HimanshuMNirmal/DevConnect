@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { messageAPI, userAPI } from '../../services/api';
 import './Conversations.css';
 
@@ -10,28 +10,9 @@ const Conversations = ({ onSelectConversation }) => {
   const [showSearch, setShowSearch] = useState(false);
   const currentUser = JSON.parse(localStorage.getItem('user'));
   const socket = window.globalSocket;
+  const refetchTimeoutRef = useRef(null);
 
-  useEffect(() => {
-    fetchConversations();
-    
-    if (socket) {
-      socket.on('message', handleNewMessage);
-      socket.on('messageSent', handleNewMessage);
-      socket.on('messageRead', handleNewMessage);  
-      
-      return () => {
-        socket.off('message', handleNewMessage);
-        socket.off('messageSent', handleNewMessage);
-        socket.off('messageRead', handleNewMessage);
-      };
-    }
-  }, [socket]);
-
-  const handleNewMessage = () => {
-    fetchConversations();
-  };
-
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     try {
       setLoading(true);
       const response = await messageAPI.getConversations();
@@ -42,7 +23,90 @@ const Conversations = ({ onSelectConversation }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const handleNewMessage = useCallback((messageData) => {
+    // Update the conversation with the new message without refetching
+    setConversations((prevConversations) => {
+      return prevConversations.map((conv) => {
+        // Check if this message belongs to this conversation
+        const isRelevant = 
+          (messageData.senderId === conv.user.id) || 
+          (messageData.receiverId === conv.user.id);
+        
+        if (isRelevant) {
+          return {
+            ...conv,
+            lastMessage: {
+              id: messageData.id || messageData.messageId,
+              senderId: messageData.senderId,
+              receiverId: messageData.receiverId,
+              message: messageData.message,
+              createdAt: messageData.createdAt,
+              isRead: messageData.isRead || false
+            },
+            lastMessageTime: messageData.createdAt || new Date().toISOString(),
+            unreadCount: messageData.senderId === currentUser?.id ? conv.unreadCount : (messageData.isRead ? conv.unreadCount : (conv.unreadCount || 0) + 1)
+          };
+        }
+        return conv;
+      });
+    });
+  }, [currentUser?.id]);
+
+  useEffect(() => {
+    fetchConversations();
+  }, [fetchConversations]);
+
+    useEffect(() => {
+    if (!socket) {
+      return;
+    }
+
+    const handleMessage = (data) => {
+      handleNewMessage(data);
+    };
+
+    const handleMessageSent = (data) => {
+      handleNewMessage(data);
+    };
+
+    const handleMessageRead = (data) => {
+      // Update the message read status locally without refetching
+      setConversations((prevConversations) => {
+        return prevConversations.map((conv) => {
+          // Check if this conversation's last message was just read
+          if (conv.lastMessage && (conv.lastMessage.id === data.messageId)) {
+            return {
+              ...conv,
+              lastMessage: {
+                ...conv.lastMessage,
+                isRead: true
+              },
+              // Reduce unread count if the message was from the sender (other user)
+              unreadCount: conv.lastMessage.senderId !== currentUser?.id && !conv.lastMessage.isRead ? Math.max(0, conv.unreadCount - 1) : conv.unreadCount
+            };
+          }
+          return conv;
+        });
+      });
+    };
+
+    socket.on('message', handleMessage);
+    socket.on('messageSent', handleMessageSent);
+    socket.on('messageRead', handleMessageRead);
+    
+    return () => {
+      socket.off('message', handleMessage);
+      socket.off('messageSent', handleMessageSent);
+      socket.off('messageRead', handleMessageRead);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      const timeoutId = refetchTimeoutRef.current;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [socket, handleNewMessage,currentUser?.id]);
 
   const handleSearchChange = async (e) => {
     const value = e.target.value;

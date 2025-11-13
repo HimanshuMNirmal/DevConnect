@@ -84,7 +84,6 @@ const PostList = ({
   useEffect(() => {
     if (initialPosts === null) {
       setPage(1);
-      fetchPosts(1, false);
     } else {
       const normalized = initialPosts.map(p => ({
         ...p,
@@ -93,37 +92,48 @@ const PostList = ({
       }));
       setPosts(normalized);
     }
-  }, [initialPosts, isProfilePage, userId]);
+  }, [initialPosts]);
 
   useEffect(() => {
     if (initialPosts === null && !isProfilePage) {
       setPage(1);
-      fetchPosts(1, false);
     }
   }, [search, selectedTags, isProfilePage, initialPosts]);
 
   useEffect(() => {
+    if (initialPosts === null && page === 1) {
+      fetchPosts(1, false);
+    }
+  }, [page, fetchPosts, initialPosts]);
+
+  useEffect(() => {
+    const currentObserverTarget = observerTarget.current;
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting && hasMore && !isLoadingMore && !loading && initialPosts === null) {
-          const nextPage = page + 1;
-          setPage(nextPage);
-          fetchPosts(nextPage, true);
+          setPage(prevPage => prevPage + 1);
         }
       },
       { threshold: 0.1 }
     );
 
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    if (currentObserverTarget) {
+      observer.observe(currentObserverTarget);
     }
 
     return () => {
-      if (observerTarget.current) {
-        observer.unobserve(observerTarget.current);
+      if (currentObserverTarget) {
+        observer.unobserve(currentObserverTarget);
       }
     };
-  }, [hasMore, isLoadingMore, loading, page, fetchPosts, initialPosts]);
+  }, [hasMore, isLoadingMore, loading, initialPosts]);
+
+  // Separate effect for fetching when page changes
+  useEffect(() => {
+    if (page > 1 && initialPosts === null) {
+      fetchPosts(page, true);
+    }
+  }, [page, initialPosts, fetchPosts]);
 
   const handleAddTag = () => {
     if (tagInput.trim() && !selectedTags.includes(tagInput.trim())) {
