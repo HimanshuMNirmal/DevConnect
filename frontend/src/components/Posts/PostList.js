@@ -249,11 +249,14 @@ const PostList = ({
                 post={post}
                 username={username}
                 currentUserId={currentUserId}
-                onLike={() => {
+                onLike={(postId, liked) => {
                   setPosts(prev =>
                     prev.map(p =>
-                      p.id === post.id
-                        ? { ...p, likes_count: p.likes_count + 1 }
+                      p.id === postId
+                        ? { 
+                            ...p, 
+                            likes_count: liked ? p.likes_count + 1 : Math.max(0, p.likes_count - 1)
+                          }
                         : p
                     )
                   );

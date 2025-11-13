@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import Markdown from 'markdown-to-jsx';
 import { userAPI } from '../../services/api';
 import PostList from '../Posts/PostList';
 import './Profile.css';
@@ -88,13 +89,34 @@ const Profile = ({ currentUserId }) => {
 
         {isEditing && isOwnProfile ? (
           <form onSubmit={handleUpdate} className="profile-form">
-            <textarea
-              name="bio"
-              placeholder="Add your bio..."
-              value={formData.bio}
-              onChange={handleChange}
-              rows="4"
-            />
+            <div className="markdown-support-notice">
+              ✨ <strong>Markdown is supported!</strong> Use markdown syntax to format your bio.
+            </div>
+            
+            <div className="bio-editor-preview">
+              <div className="bio-editor-section">
+                <label>Bio (Markdown)</label>
+                <textarea
+                  name="bio"
+                  placeholder="Add your bio...&#10;&#10;You can use markdown:&#10;**bold** *italic* `code`&#10;[links](url)"
+                  value={formData.bio}
+                  onChange={handleChange}
+                  rows="6"
+                />
+              </div>
+
+              <div className="bio-preview-section">
+                <label>Preview</label>
+                <div className="bio-preview-box">
+                  {formData.bio ? (
+                    <Markdown>{formData.bio}</Markdown>
+                  ) : (
+                    <p className="preview-placeholder">Your bio preview will appear here...</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <input
               type="text"
               name="skills"
@@ -119,8 +141,13 @@ const Profile = ({ currentUserId }) => {
           <div className="profile-details">
             {profile.bio && (
               <div className="detail-section">
-                <h3>Bio</h3>
-                <p>{profile.bio}</p>
+                <div className="bio-header">
+                  <h3>Bio</h3>
+                  <span className="bio-markdown-badge">✨ Markdown supported</span>
+                </div>
+                <div className="bio-content">
+                  <Markdown>{profile.bio}</Markdown>
+                </div>
               </div>
             )}
             {profile.skills && (

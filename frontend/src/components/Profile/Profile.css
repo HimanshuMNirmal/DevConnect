@@ -71,11 +71,101 @@
   font-weight: var(--font-weight-bold);
 }
 
+.bio-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.bio-markdown-badge {
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  color: var(--color-dark-text);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
 .detail-section p {
   color: var(--color-medium-text);
   line-height: 1.6;
   margin: 0;
   font-size: var(--font-size-base);
+}
+
+.bio-content {
+  color: var(--color-medium-text);
+  line-height: 1.6;
+  font-size: var(--font-size-base);
+}
+
+.bio-content h1,
+.bio-content h2,
+.bio-content h3,
+.bio-content h4,
+.bio-content h5,
+.bio-content h6 {
+  color: var(--color-dark-text);
+  font-weight: var(--font-weight-bold);
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.bio-content h1 { font-size: 1.5em; }
+.bio-content h2 { font-size: 1.3em; }
+.bio-content h3 { font-size: 1.1em; }
+
+.bio-content a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+
+.bio-content a:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+.bio-content code {
+  background: rgba(102, 126, 234, 0.1);
+  color: #e83e8c;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.bio-content strong,
+.bio-content b {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-dark-text);
+}
+
+.bio-content em,
+.bio-content i {
+  font-style: italic;
+}
+
+.bio-content ul,
+.bio-content ol {
+  margin: var(--spacing-sm) 0;
+  padding-left: var(--spacing-lg);
+  color: var(--color-medium-text);
+}
+
+.bio-content li {
+  margin: var(--spacing-xs) 0;
+}
+
+.bio-content blockquote {
+  border-left: 4px solid var(--color-primary);
+  padding-left: var(--spacing-md);
+  margin-left: 0;
+  color: var(--color-dark-gray);
+  font-style: italic;
 }
 
 .skills-list {
@@ -111,10 +201,79 @@
   opacity: 0.9;
 }
 
-.profile-form {
+.profile-form .markdown-support-notice {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(240, 147, 251, 0.1));
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  color: var(--color-dark-text);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--spacing-lg);
+}
+
+.bio-editor-preview {
+  display: flex;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  width: 100%;
+}
+
+.bio-editor-section,
+.bio-preview-section {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.bio-editor-section label,
+.bio-preview-section label {
+  color: var(--color-dark-text);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+}
+
+.bio-editor-section textarea {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-family: 'Courier New', monospace;
+  box-sizing: border-box;
+  color: var(--color-dark-text);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  resize: vertical;
+  min-height: 200px;
+  background: var(--color-bg-secondary);
+  line-height: 1.6;
+}
+
+.bio-editor-section textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+}
+
+.bio-preview-box {
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  min-height: 200px;
+  overflow-y: auto;
+  color: var(--color-medium-text);
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.preview-placeholder {
+  color: var(--color-dark-gray);
+  font-style: italic;
+  margin: 0;
 }
 
 .profile-form textarea,
@@ -221,6 +380,16 @@
 
   .form-buttons {
     flex-direction: column;
+  }
+
+  .bio-editor-preview {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .bio-editor-section textarea,
+  .bio-preview-box {
+    min-height: 150px;
   }
 
   .profile-posts-section {

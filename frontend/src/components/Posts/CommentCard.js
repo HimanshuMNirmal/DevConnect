@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../theme/useTheme';
+import Markdown from 'markdown-to-jsx';
 
 const CommentCard = React.memo(({ 
   comment, 
@@ -197,7 +198,9 @@ const CommentCard = React.memo(({
         </div>
       ) : (
         <>
-          <p style={commentStyles.content}>{comment.content}</p>
+          <div style={commentStyles.content}>
+            <Markdown>{comment.content}</Markdown>
+          </div>
 
           {isCommentAuthor && (
             <div style={commentStyles.actionButtons}>

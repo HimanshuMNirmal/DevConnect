@@ -102,18 +102,25 @@ body {
 }
 
 #root {
-  height: 100vh;
+  min-height: 100vh;
+  display: flex;
+}
+
+html {
+  height: 100%;
 }
 
 body {
-  height: 100vh;
-  overflow: hidden;
+  height: auto;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .app {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
+  width: 100%;
 }
 
 .app > nav {
@@ -125,11 +132,13 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  width: 100%;
 }
 
 .app > footer {
   flex-shrink: 0;
   z-index: 50;
+  margin-top: auto;
 }
 
 a {

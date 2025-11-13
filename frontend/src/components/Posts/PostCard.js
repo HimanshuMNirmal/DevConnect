@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Markdown from 'markdown-to-jsx';
 import Comments from './Comments';
 import { postAPI } from '../../services/api';
 
@@ -21,9 +22,9 @@ const PostCard = React.memo(({ post, username, currentUserId, onLike, onAuthorCl
       setIsLiking(true);
       // TOGGLE POST LIKE STATUS
       // Send like/unlike request to backend
-      await postAPI.toggleLike(post.id);
+      const response = await postAPI.toggleLike(post.id);
       if (onLike) {
-        onLike(post.id);
+        onLike(post.id, response.data.liked);
       }
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -40,7 +41,9 @@ const PostCard = React.memo(({ post, username, currentUserId, onLike, onAuthorCl
         <span className="post-date">{new Date(post.createdAt).toLocaleDateString()}</span>
       </div>
 
-      <p className="post-content">{post.content}</p>
+      <div className="post-content">
+        <Markdown>{post.content}</Markdown>
+      </div>
 
       {/* DISPLAY POST TAGS IF AVAILABLE */}
       {post.tags && (

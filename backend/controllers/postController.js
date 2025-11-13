@@ -265,7 +265,7 @@ const toggleLike = async (req, res) => {
       await prisma.postLike.delete({
         where: { id: existingLike.id }
       });
-      res.json({ message: 'Post unliked' });
+      res.json({ message: 'Post unliked', liked: false });
     } else {
       await prisma.postLike.create({
         data: {
@@ -273,7 +273,7 @@ const toggleLike = async (req, res) => {
           userId
         }
       });
-      res.json({ message: 'Post liked' });
+      res.json({ message: 'Post liked', liked: true });
     }
   } catch (error) {
     console.error('Like post error:', error);

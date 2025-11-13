@@ -15,8 +15,10 @@ const setupSocket = (server) => {
   const userSockets = {}; 
 
   io.on('connection', (socket) => {
+    
     // USER JOIN EVENT - ADD USER TO TRACKING AND BROADCAST ONLINE STATUS
     socket.on('join', (userId) => {
+      
       if (!userSockets[userId]) {
         userSockets[userId] = new Set();
       }
@@ -111,9 +113,11 @@ const setupSocket = (server) => {
 
     // HANDLE CONVERSATION READ BY USER
     socket.on('conversationReadByUser', (data) => {
+      
       const { conversationWith, readBy } = data;
       
       const otherUserSockets = userSockets[conversationWith];
+      
       
       // NOTIFY OTHER USER THAT CONVERSATION WAS READ
       if (otherUserSockets && otherUserSockets.size > 0) {
@@ -123,11 +127,13 @@ const setupSocket = (server) => {
             conversationWith
           });
         });
+      } else {
       }
     });
 
     // USER DISCONNECT EVENT
     socket.on('disconnect', () => {
+      
       // FIND AND REMOVE SOCKET FROM USER TRACKING
       for (const userId in userSockets) {
         if (userSockets[userId].has(socket.id)) {
@@ -142,7 +148,6 @@ const setupSocket = (server) => {
           break;
         }
       }
-      
     });
   });
 

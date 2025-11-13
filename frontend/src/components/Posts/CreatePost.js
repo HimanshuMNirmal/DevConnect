@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { postAPI } from '../../services/api';
+import Markdown from 'markdown-to-jsx';
 import './Posts.css';
 
 const CreatePost = () => {
@@ -46,6 +47,9 @@ const CreatePost = () => {
     <div className="create-post-container">
       <div className="create-post-form">
         <h2>Create New Post</h2>
+        <div className="markdown-support-notice">
+          ✨ <strong>Markdown is supported!</strong> Use markdown syntax to format your content.
+        </div>
         {error && <div className="error">{error}</div>}
         <form onSubmit={handleSubmit}>
           <input
@@ -56,14 +60,32 @@ const CreatePost = () => {
             onChange={handleChange}
             required
           />
-          <textarea
-            name="content"
-            placeholder="What's on your mind? Share your thoughts..."
-            value={formData.content}
-            onChange={handleChange}
-            rows="8"
-            required
-          />
+          
+          <div className="content-editor-preview">
+            <div className="editor-section">
+              <label>Content (Markdown)</label>
+              <textarea
+                name="content"
+                placeholder="What's on your mind? Share your thoughts...&#10;&#10;You can use markdown:&#10;# Heading&#10;**bold** *italic* `code`&#10;- Lists&#10;[links](url)"
+                value={formData.content}
+                onChange={handleChange}
+                rows="12"
+                required
+              />
+            </div>
+
+            <div className="preview-section">
+              <label>Preview</label>
+              <div className="markdown-preview">
+                {formData.content ? (
+                  <Markdown>{formData.content}</Markdown>
+                ) : (
+                  <p className="preview-placeholder">Your markdown preview will appear here...</p>
+                )}
+              </div>
+            </div>
+          </div>
+
           <input
             type="text"
             name="tags"

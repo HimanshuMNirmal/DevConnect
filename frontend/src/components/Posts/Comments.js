@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../../theme/useTheme';
 import { postAPI } from '../../services/api';
+import Markdown from 'markdown-to-jsx';
 import CommentCard from './CommentCard';
 import './Comments.css';
 
@@ -142,15 +143,44 @@ const Comments = ({
       fontWeight: theme.fontWeights.semibold,
       marginBottom: theme.spacing.lg,
     },
+    markdownNotice: {
+      backgroundColor: 'rgba(102, 126, 234, 0.1)',
+      border: `1px solid ${theme.colors.primary}`,
+      color: theme.colors.darkText,
+      padding: theme.spacing.md,
+      borderRadius: theme.borderRadius.sm,
+      marginBottom: theme.spacing.lg,
+      fontSize: theme.fontSizes.sm,
+    },
     addCommentForm: {
       marginBottom: theme.spacing.xl,
       paddingBottom: theme.spacing.xl,
       borderBottom: `1px solid ${theme.colors.borderColorLight}`,
     },
-    formGroup: {
+    editorPreviewContainer: {
+      display: 'flex',
+      gap: theme.spacing.lg,
+      marginBottom: theme.spacing.md,
+      '@media (max-width: 768px)': {
+        flexDirection: 'column',
+      },
+    },
+    editorSection: {
+      flex: 1,
       display: 'flex',
       flexDirection: 'column',
       gap: theme.spacing.sm,
+    },
+    previewSection: {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: theme.spacing.sm,
+    },
+    label: {
+      color: theme.colors.darkText,
+      fontWeight: theme.fontWeights.semibold,
+      fontSize: theme.fontSizes.sm,
     },
     textarea: {
       padding: theme.spacing.md,
@@ -163,6 +193,21 @@ const Comments = ({
       resize: 'vertical',
       minHeight: '100px',
       transition: `border-color ${theme.transitions.base}`,
+    },
+    markdownPreview: {
+      padding: theme.spacing.md,
+      backgroundColor: theme.colors.bgSecondary,
+      border: `1px solid ${theme.colors.borderColor}`,
+      borderRadius: theme.borderRadius.sm,
+      minHeight: '100px',
+      color: theme.colors.mediumText,
+      lineHeight: '1.6',
+      overflowY: 'auto',
+      wordBreak: 'break-word',
+    },
+    previewPlaceholder: {
+      color: theme.colors.darkGray,
+      fontStyle: 'italic',
     },
     submitButton: {
       padding: `${theme.spacing.md} ${theme.spacing.lg}`,
@@ -213,44 +258,63 @@ const Comments = ({
     <div style={commentsStyles.container}>
       <h3 style={commentsStyles.title}>Comments ({comments.length})</h3>
 
+      <div style={commentsStyles.markdownNotice}>
+        ✨ <strong>Markdown is supported!</strong> Format your comments with markdown syntax.
+      </div>
+
       {error && (
         <div style={commentsStyles.error}>{error}</div>
       )}
 
       {currentUserId && (
         <form style={commentsStyles.addCommentForm} onSubmit={handleAddComment}>
-          <div style={commentsStyles.formGroup}>
-            <textarea
-              style={commentsStyles.textarea}
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              onFocus={(e) => {
-                e.target.style.borderColor = theme.colors.primary;
-                e.target.style.boxShadow = `0 0 5px rgba(102, 126, 234, 0.3)`;
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = theme.colors.borderColor;
-                e.target.style.boxShadow = 'none';
-              }}
-              placeholder="Share your thoughts..."
-              disabled={isSubmitting}
-            />
-            <button
-              type="submit"
-              style={commentsStyles.submitButton}
-              disabled={isSubmitting || !newComment.trim()}
-              onMouseEnter={(e) => {
-                if (!isSubmitting && newComment.trim()) {
-                  e.target.style.backgroundColor = theme.colors.primaryDark;
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = theme.colors.primary;
-              }}
-            >
-              {isSubmitting ? 'Posting...' : 'Post Comment'}
-            </button>
+          <div style={commentsStyles.editorPreviewContainer}>
+            <div style={commentsStyles.editorSection}>
+              <label style={commentsStyles.label}>Your Comment</label>
+              <textarea
+                style={commentsStyles.textarea}
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                onFocus={(e) => {
+                  e.target.style.borderColor = theme.colors.primary;
+                  e.target.style.boxShadow = `0 0 5px rgba(102, 126, 234, 0.3)`;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = theme.colors.borderColor;
+                  e.target.style.boxShadow = 'none';
+                }}
+                placeholder="Share your thoughts...&#10;&#10;You can use markdown:&#10;**bold** *italic* `code`&#10;- Lists&#10;[links](url)"
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div style={commentsStyles.previewSection}>
+              <label style={commentsStyles.label}>Preview</label>
+              <div style={commentsStyles.markdownPreview}>
+                {newComment ? (
+                  <Markdown>{newComment}</Markdown>
+                ) : (
+                  <p style={commentsStyles.previewPlaceholder}>Your markdown preview will appear here...</p>
+                )}
+              </div>
+            </div>
           </div>
+
+          <button
+            type="submit"
+            style={commentsStyles.submitButton}
+            disabled={isSubmitting || !newComment.trim()}
+            onMouseEnter={(e) => {
+              if (!isSubmitting && newComment.trim()) {
+                e.target.style.backgroundColor = theme.colors.primaryDark;
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = theme.colors.primary;
+            }}
+          >
+            {isSubmitting ? 'Posting...' : 'Post Comment'}
+          </button>
         </form>
       )}
 
