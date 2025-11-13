@@ -16,6 +16,8 @@ const Profile = ({ currentUserId }) => {
   const [error, setError] = useState('');
   const currentUser = JSON.parse(localStorage.getItem('user'));
 
+  // FETCH USER PROFILE DATA
+  // Load user profile information and their posts on component mount
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
@@ -48,8 +50,11 @@ const Profile = ({ currentUserId }) => {
     e.preventDefault();
     try {
       const numericUserId = parseInt(userId, 10);
+      // UPDATE USER PROFILE IN BACKEND
+      // Send updated bio and skills to backend
       await userAPI.updateUserProfile(numericUserId, formData.bio, formData.skills);
       setIsEditing(false);
+      // REFRESH PROFILE DATA AFTER UPDATE
       fetchProfile();
     } catch (err) {
       setError('Failed to update profile');
@@ -61,6 +66,8 @@ const Profile = ({ currentUserId }) => {
   if (!profile) return <div className="error">Profile not found</div>;
 
   const numericUserId = parseInt(userId, 10);
+  // CHECK IF VIEWING OWN PROFILE
+  // Enable edit functionality only for the profile owner
   const isOwnProfile = currentUser?.id === numericUserId;
 
   return (

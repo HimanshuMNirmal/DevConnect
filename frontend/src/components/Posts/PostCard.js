@@ -19,6 +19,8 @@ const PostCard = React.memo(({ post, username, currentUserId, onLike, onAuthorCl
 
     try {
       setIsLiking(true);
+      // TOGGLE POST LIKE STATUS
+      // Send like/unlike request to backend
       await postAPI.toggleLike(post.id);
       if (onLike) {
         onLike(post.id);
@@ -40,6 +42,7 @@ const PostCard = React.memo(({ post, username, currentUserId, onLike, onAuthorCl
 
       <p className="post-content">{post.content}</p>
 
+      {/* DISPLAY POST TAGS IF AVAILABLE */}
       {post.tags && (
         <div className="post-tags">
           {post.tags.split(',').map((tag, idx) => (
@@ -50,6 +53,7 @@ const PostCard = React.memo(({ post, username, currentUserId, onLike, onAuthorCl
 
       <div className="post-footer">
         <div className="post-actions">
+          {/* LIKE BUTTON - ALLOWS AUTHENTICATED USERS TO LIKE POSTS */}
           <button
             className={`like-btn ${isLiked ? 'liked' : ''}`}
             onClick={handleLikeClick}
@@ -59,6 +63,7 @@ const PostCard = React.memo(({ post, username, currentUserId, onLike, onAuthorCl
             ❤️ {likesCount}
           </button>
 
+          {/* COMMENTS TOGGLE - SHOW/HIDE COMMENTS SECTION */}
           <button
             className={`comments-btn ${showComments ? 'active' : ''}`}
             onClick={() => setShowComments(!showComments)}
@@ -68,6 +73,7 @@ const PostCard = React.memo(({ post, username, currentUserId, onLike, onAuthorCl
           </button>
         </div>
 
+        {/* AUTHOR LINK - NAVIGATE TO AUTHOR'S PROFILE */}
         <button
           className="post-author-link"
           onClick={() => onAuthorClick(userId)}
@@ -76,6 +82,7 @@ const PostCard = React.memo(({ post, username, currentUserId, onLike, onAuthorCl
         </button>
       </div>
 
+      {/* RENDER COMMENTS SECTION WHEN TOGGLED */}
       {showComments && (
         <Comments
           postId={post.id}

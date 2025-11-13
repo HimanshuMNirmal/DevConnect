@@ -1,9 +1,13 @@
 const prisma = require('../config/prisma');
 
+// FETCH ALL CONVERSATIONS FOR CURRENT USER
+// Returns list of unique conversation partners with last message and unread count
 const getConversations = async (req, res) => {
   try {
     const currentUserId = req.user.id;
 
+    // QUERY ALL UNIQUE CONVERSATION PARTNERS
+    // Identify both sent and received conversations
     const conversations = await prisma.$queryRaw`
       SELECT DISTINCT 
         CASE 
@@ -17,8 +21,10 @@ const getConversations = async (req, res) => {
       ORDER BY "lastMessageTime" DESC
     `;
 
+    // ENRICH CONVERSATION DATA WITH USER INFO, LAST MESSAGE, AND UNREAD COUNT
     const conversationDetails = await Promise.all(
       conversations.map(async (conv) => {
+        // FETCH CONVERSATION PARTNER DATA
         const user = await prisma.user.findUnique({
           where: { id: conv.userId },
           select: {
@@ -29,6 +35,7 @@ const getConversations = async (req, res) => {
           }
         });
 
+        // GET LAST MESSAGE IN CONVERSATION
         const lastMessage = await prisma.message.findFirst({
           where: {
             OR: [
@@ -45,6 +52,7 @@ const getConversations = async (req, res) => {
           }
         });
 
+        // COUNT UNREAD MESSAGES FROM THIS CONVERSATION PARTNER
         const unreadCount = await prisma.message.count({
           where: {
             senderId: conv.userId,
@@ -75,15 +83,18 @@ const getMessages = async (req, res) => {
     const { page = 1, limit = 50 } = req.query;
     const currentUserId = req.user.id;
 
+    // VALIDATE USER ID PARAMETER
     const parsedUserId = parseInt(userId);
     if (isNaN(parsedUserId)) {
       return res.status(400).json({ message: 'Invalid user ID' });
     }
 
+    // VALIDATE AND SANITIZE PAGINATION PARAMETERS
     const parsedPage = Math.max(1, parseInt(page) || 1);
     const parsedLimit = Math.max(1, Math.min(100, parseInt(limit) || 50));
     const skip = (parsedPage - 1) * parsedLimit;
 
+    // GET TOTAL MESSAGE COUNT FOR CONVERSATION
     const totalCount = await prisma.message.count({
       where: {
         OR: [
@@ -99,6 +110,7 @@ const getMessages = async (req, res) => {
       }
     });
 
+    // FETCH PAGINATED MESSAGES BETWEEN TWO USERS
     const messages = await prisma.message.findMany({
       where: {
         OR: [
@@ -156,15 +168,18 @@ const sendMessage = async (req, res) => {
     const { receiverId, message } = req.body;
     const senderId = req.user.id;
 
+    // VALIDATE REQUIRED FIELDS
     if (!receiverId || !message) {
       return res.status(400).json({ message: 'Receiver ID and message are required' });
     }
 
+    // VALIDATE RECEIVER ID
     const parsedReceiverId = parseInt(receiverId);
     if (isNaN(parsedReceiverId)) {
       return res.status(400).json({ message: 'Invalid receiver ID' });
     }
 
+    // VERIFY SENDER EXISTS
     const senderExists = await prisma.user.findUnique({
       where: { id: senderId }
     });
@@ -173,6 +188,7 @@ const sendMessage = async (req, res) => {
       return res.status(401).json({ message: 'Sender not found' });
     }
 
+    // VERIFY RECEIVER EXISTS
     const receiverExists = await prisma.user.findUnique({
       where: { id: parsedReceiverId }
     });
@@ -181,6 +197,7 @@ const sendMessage = async (req, res) => {
       return res.status(404).json({ message: 'Receiver not found' });
     }
 
+    // CREATE MESSAGE IN DATABASE
     const newMessage = await prisma.message.create({
       data: {
         senderId,
@@ -239,11 +256,13 @@ const markConversationAsRead = async (req, res) => {
     const { userId } = req.params;
     const currentUserId = req.user.id;
 
+    // VALIDATE USER ID
     const parsedUserId = parseInt(userId);
     if (isNaN(parsedUserId)) {
       return res.status(400).json({ message: 'Invalid user ID' });
     }
 
+    // UPDATE ALL UNREAD MESSAGES FROM THIS USER TO READ
     const result = await prisma.message.updateMany({
       where: {
         senderId: parsedUserId,
@@ -255,12 +274,15 @@ const markConversationAsRead = async (req, res) => {
 
     const io = req.app.get('io');
     
+    // EMIT SOCKET EVENTS TO BOTH USERS IF MESSAGES WERE MARKED AS READ
     if (io && result.count > 0) {
+      // NOTIFY CURRENT USER ABOUT THE READ STATUS UPDATE
       io.to(`user_${currentUserId}`).emit('conversationMarkedAsRead', {
         userId: parsedUserId,
         markedCount: result.count
       });
 
+      // NOTIFY OTHER USER THAT THEIR MESSAGES WERE READ
       io.to(`user_${parsedUserId}`).emit('conversationMarkedAsRead', {
         readBy: currentUserId,
         markedCount: result.count

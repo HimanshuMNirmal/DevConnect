@@ -15,6 +15,8 @@ import PublicRoute from './PublicRoute';
 const AppRouter = ({ isAuthenticated, onLogin, onLogout, user }) => {
   const [isLoading, setIsLoading] = useState(true);
 
+  // CHECK AUTHENTICATION STATUS ON MOUNT
+  // Initialize loading state to complete async auth checks
   useEffect(() => {
     const checkAuth = () => {
       setIsLoading(false);
@@ -33,6 +35,7 @@ const AppRouter = ({ isAuthenticated, onLogin, onLogout, user }) => {
 
   return (
     <Routes>
+      {/* PUBLIC ROUTES */}
       <Route
         path="/"
         element={
@@ -45,6 +48,7 @@ const AppRouter = ({ isAuthenticated, onLogin, onLogout, user }) => {
         }
       />
 
+      {/* AUTHENTICATION ROUTES - Only accessible to unauthenticated users */}
       <Route
         path="/login"
         element={
@@ -63,6 +67,7 @@ const AppRouter = ({ isAuthenticated, onLogin, onLogout, user }) => {
         }
       />
 
+      {/* PROTECTED ROUTES - Only accessible to authenticated users */}
       <Route
         path="/create-post"
         element={
@@ -72,6 +77,7 @@ const AppRouter = ({ isAuthenticated, onLogin, onLogout, user }) => {
         }
       />
 
+      {/* USER PROFILE ROUTES */}
       <Route
         path="/profile/:userId"
         element={
@@ -79,6 +85,7 @@ const AppRouter = ({ isAuthenticated, onLogin, onLogout, user }) => {
         }
       />
 
+      {/* MESSAGING ROUTES */}
       <Route
         path="/messages"
         element={
@@ -97,6 +104,7 @@ const AppRouter = ({ isAuthenticated, onLogin, onLogout, user }) => {
         }
       />
 
+      {/* FALLBACK - Redirect all undefined routes to home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

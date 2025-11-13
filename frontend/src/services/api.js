@@ -9,6 +9,8 @@ const api = axios.create({
   },
 });
 
+// REQUEST INTERCEPTOR - ADD JWT TOKEN TO ALL REQUESTS
+// Automatically attach Bearer token from localStorage to Authorization header
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -17,6 +19,8 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// AUTHENTICATION API
+// Handles user registration and login operations
 export const authAPI = {
   register: (username, email, password) =>
     api.post('/auth/register', { username, email, password }),
@@ -24,6 +28,8 @@ export const authAPI = {
     api.post('/auth/login', { email, password }),
 };
 
+// POSTS API
+// Handles CRUD operations for posts, likes, and comments
 export const postAPI = {
   getAllPosts: (page = 1, limit = 10, search = '', tags = '') => 
     api.get('/posts', { params: { page, limit, search, tags } }),
@@ -45,6 +51,8 @@ export const postAPI = {
     api.delete(`/posts/comments/${commentId}`),
 };
 
+// USERS API
+// Handles user profile search and information retrieval
 export const userAPI = {
   searchUsers: (query) => api.get('/users/search', { params: { query } }),
   getUserProfile: (id, page = 1, limit = 10) => api.get(`/users/${id}`, { params: { page, limit } }),
@@ -52,6 +60,8 @@ export const userAPI = {
     api.put(`/users/${id}`, { bio, skills, profile_pic }),
 };
 
+// MESSAGES API
+// Handles direct messaging and conversation management
 export const messageAPI = {
   getConversations: () => api.get('/messages/conversations/list'),
   getMessages: (userId, page = 1, limit = 50) => api.get(`/messages/${userId}`, { params: { page, limit } }),

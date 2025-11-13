@@ -3,6 +3,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { ThemeProvider } from './theme';
 import Navbar from './components/Navbar/Navbar';
+import Footer from './components/Footer/Footer';
 import AppRouter from './routes/AppRouter';
 import './App.css';
 
@@ -12,6 +13,8 @@ function App() {
   const socketRef = useRef(null);
   const hasJoinedRef = useRef(false);
 
+  // RESTORE USER SESSION FROM LOCALSTORAGE
+  // Check if user was previously logged in by retrieving stored credentials
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('token');
@@ -22,6 +25,9 @@ function App() {
     }
   }, []);
 
+  // INITIALIZE SOCKET.IO CONNECTION
+  // Establish real-time WebSocket connection when user is authenticated
+  // Set up connection handlers and store socket reference globally for use across components
   useEffect(() => {
     if (isAuthenticated && user) {
       if (!socketRef.current) {
@@ -68,6 +74,9 @@ function App() {
     }
   };
 
+  // HANDLE USER LOGOUT
+  // Clear authentication state and remove stored credentials
+  // Disconnect socket connection to prevent reconnection after logout
   const handleLogout = () => {
     setUser(null);
     setIsAuthenticated(false);
@@ -97,6 +106,7 @@ function App() {
             onLogout={handleLogout}
             user={user}
           />
+          <Footer />
         </div>
       </Router>
     </ThemeProvider>

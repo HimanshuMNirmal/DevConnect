@@ -26,12 +26,16 @@ const Register = ({ onLogin }) => {
     setError('');
 
     try {
+      // SUBMIT REGISTRATION DATA TO BACKEND
+      // Create new user account with username, email, and password
       const response = await authAPI.register(
         formData.username,
         formData.email,
         formData.password
       );
       
+      // STORE AUTH CREDENTIALS IN LOCALSTORAGE
+      // Save JWT token and user info for immediate login after registration
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       

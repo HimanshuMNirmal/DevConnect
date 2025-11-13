@@ -26,11 +26,14 @@ const CreatePost = () => {
     setError('');
 
     try {
+      // SEND POST DATA TO BACKEND
+      // Create new post with title, content, and tags
       await postAPI.createPost(
         formData.title,
         formData.content,
         formData.tags
       );
+      // REDIRECT TO HOME AFTER SUCCESSFUL POST CREATION
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create post');

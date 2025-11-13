@@ -36,16 +36,6 @@ const Home = ({ isAuthenticated, onLogout, currentUserId, username }) => {
         </div>
         <PostList currentUserId={currentUserId} username={username} />
       </main>
-
-      <footer 
-        className="footer"
-        style={{
-          background: theme.colors.darkText,
-          color: theme.colors.white
-        }}
-      >
-        <p>&copy; 2025 DevConnect. All rights reserved.</p>
-      </footer>
     </div>
   );
 };

@@ -1,14 +1,18 @@
 const prisma = require('../config/prisma');
 
+// FETCH ALL POSTS WITH PAGINATION AND FILTERING
+// Supports searching by title/content and filtering by tags
 const getAllPosts = async (req, res) => {
   try {
     const { page = 1, limit = 10, search = '', tags = '' } = req.query;
+    // VALIDATE AND SANITIZE PAGINATION PARAMETERS
     const pageNum = Math.max(1, parseInt(page, 10));
     const limitNum = Math.min(parseInt(limit, 10), 50); 
     const skip = (pageNum - 1) * limitNum;
 
     const where = {};
     
+    // FILTER BY SEARCH QUERY IF PROVIDED
     if (search) {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
@@ -16,6 +20,7 @@ const getAllPosts = async (req, res) => {
       ];
     }
 
+    // FILTER BY TAGS IF PROVIDED
     if (tags) {
       const tagArray = tags.split(',').map(t => t.trim()).filter(t => t);
       if (tagArray.length > 0) {
@@ -28,8 +33,10 @@ const getAllPosts = async (req, res) => {
       }
     }
 
+    // GET TOTAL COUNT FOR PAGINATION
     const total = await prisma.post.count({ where });
 
+    // FETCH POSTS WITH RELATED DATA
     const posts = await prisma.post.findMany({
       where,
       include: {
@@ -50,6 +57,7 @@ const getAllPosts = async (req, res) => {
       take: limitNum
     });
 
+    // CALCULATE COUNTS FOR LIKES AND COMMENTS
     const postsWithCounts = posts.map(post => ({
       ...post,
       likes_count: post.likes.length,
@@ -119,10 +127,12 @@ const createPost = async (req, res) => {
     const { title, content, tags } = req.body;
     const userId = req.user.id;
 
+    // VALIDATE REQUIRED FIELDS
     if (!title || !content) {
       return res.status(400).json({ message: 'Title and content are required' });
     }
 
+    // CREATE NEW POST IN DATABASE
     const newPost = await prisma.post.create({
       data: {
         title,
@@ -157,6 +167,7 @@ const updatePost = async (req, res) => {
     const { title, content, tags } = req.body;
     const userId = req.user.id;
 
+    // VERIFY POST EXISTS
     const post = await prisma.post.findUnique({
       where: { id: parseInt(id) }
     });
@@ -165,10 +176,12 @@ const updatePost = async (req, res) => {
       return res.status(404).json({ message: 'Post not found' });
     }
 
+    // VERIFY USER IS POST OWNER (AUTHORIZATION CHECK)
     if (post.userId !== userId) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
+    // UPDATE POST DATA
     const updatedPost = await prisma.post.update({
       where: { id: parseInt(id) },
       data: {
@@ -230,6 +243,7 @@ const toggleLike = async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
+    // VERIFY POST EXISTS
     const post = await prisma.post.findUnique({
       where: { id: parseInt(id) }
     });
@@ -238,6 +252,7 @@ const toggleLike = async (req, res) => {
       return res.status(404).json({ message: 'Post not found' });
     }
 
+    // CHECK IF USER ALREADY LIKED THIS POST
     const existingLike = await prisma.postLike.findFirst({
       where: {
         postId: parseInt(id),
@@ -245,6 +260,7 @@ const toggleLike = async (req, res) => {
       }
     });
 
+    // TOGGLE LIKE - UNLIKE IF ALREADY LIKED, LIKE IF NOT LIKED
     if (existingLike) {
       await prisma.postLike.delete({
         where: { id: existingLike.id }
@@ -271,15 +287,18 @@ const createComment = async (req, res) => {
     const { content } = req.body;
     const userId = req.user.id;
 
+    // VALIDATE COMMENT CONTENT
     if (!content || content.trim().length === 0) {
       return res.status(400).json({ message: 'Comment content is required' });
     }
 
+    // VALIDATE POST ID
     const postId = parseInt(id);
     if (isNaN(postId)) {
       return res.status(400).json({ message: 'Invalid post ID' });
     }
 
+    // VERIFY POST EXISTS
     const post = await prisma.post.findUnique({
       where: { id: postId }
     });
@@ -288,6 +307,7 @@ const createComment = async (req, res) => {
       return res.status(404).json({ message: 'Post not found' });
     }
 
+    // CREATE NEW COMMENT
     const comment = await prisma.comment.create({
       data: {
         postId,

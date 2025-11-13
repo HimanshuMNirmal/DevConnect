@@ -28,6 +28,9 @@ const Chat = ({ userId }) => {
     }
   };
 
+  // MARK SINGLE MESSAGE AS READ
+  // Update message read status both locally and in backend
+  // Also emit socket event to notify sender
   const markMessageAsRead = async (messageId, messageData = null) => {
     try {
       let msg = messageData;
@@ -80,8 +83,11 @@ const Chat = ({ userId }) => {
     try {
       setLoading(true);
       setError(null);
+      // FETCH INITIAL BATCH OF MESSAGES
+      // Load messages with pagination from API
       const response = await messageAPI.getMessages(userId, 1, MESSAGES_PER_PAGE);
       const fetchedMessages = response.data?.data || [];
+      // Reverse to show oldest first
       setMessages(fetchedMessages.reverse());
       setCurrentPage(1);
       setHasMore(response.data?.pagination?.hasMore || false);
@@ -101,19 +107,24 @@ const Chat = ({ userId }) => {
     try {
       setLoadingMore(true);
       
+      // STORE SCROLL POSITION BEFORE LOADING
+      // Calculate how much new content will be added
       const container = messagesContainerRef.current;
       const scrollHeightBefore = container.scrollHeight;
       const scrollPositionBefore = container.scrollTop;
       
+      // FETCH PREVIOUS MESSAGES (PAGINATION)
       const nextPage = currentPage + 1;
       const response = await messageAPI.getMessages(userId, nextPage, MESSAGES_PER_PAGE);
       const newMessages = response.data?.data || [];
       
       if (newMessages.length > 0) {
+        // PREPEND NEW MESSAGES AND MAINTAIN SCROLL POSITION
         setMessages((prev) => [...newMessages.reverse(), ...prev]);
         setCurrentPage(nextPage);
         setHasMore(response.data?.pagination?.hasMore || false);
         
+        // ADJUST SCROLL TO KEEP SAME VISIBLE MESSAGES IN VIEW
         setTimeout(() => {
           const scrollHeightAfter = container.scrollHeight;
           const heightDifference = scrollHeightAfter - scrollHeightBefore;
@@ -135,9 +146,11 @@ const Chat = ({ userId }) => {
 
   const markAllConversationMessagesAsRead = useCallback(async () => {
     try {
-      
+      // MARK ALL UNREAD MESSAGES FROM CONVERSATION PARTNER AS READ
+      // Send request to backend to update read status for entire conversation
       const response = await messageAPI.markConversationAsRead(userId);
       
+      // UPDATE LOCAL STATE TO REFLECT READ STATUS
       setMessages((prev) => {
         const updated = prev.map((msg) => {
           if (msg.senderId === parseInt(userId)) {
@@ -148,7 +161,7 @@ const Chat = ({ userId }) => {
         return updated;
       });
       
-      
+      // EMIT SOCKET EVENT TO NOTIFY CONVERSATION PARTNER
       if (socket) {
         socket.emit('conversationReadByUser', {
           conversationWith: parseInt(userId),
@@ -292,9 +305,12 @@ const Chat = ({ userId }) => {
       const messageText = message;
       setMessage(''); 
 
+      // SEND MESSAGE TO BACKEND
+      // Create message in database
       const response = await messageAPI.sendMessage(userId, messageText);
       const newMessage = response.data?.data;
 
+      // EMIT MESSAGE VIA SOCKET TO RECEIVER IN REAL-TIME
       socket.emit('sendMessage', {
         id: newMessage?.id,
         senderId: currentUser?.id,
@@ -306,6 +322,7 @@ const Chat = ({ userId }) => {
         isRead: false
       });
 
+      // NOTIFY RECEIVER THAT USER STOPPED TYPING
       socket.emit('stopTyping', {
         senderId: currentUser?.id,
         receiverId: userId,
@@ -319,6 +336,7 @@ const Chat = ({ userId }) => {
 
   const handleTyping = () => {
     if (socket) {
+      // EMIT TYPING INDICATOR TO RECEIVER
       socket.emit('typing', {
         senderId: currentUser?.id,
         receiverId: userId,

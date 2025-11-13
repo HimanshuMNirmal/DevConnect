@@ -25,8 +25,12 @@ const Login = ({ onLogin }) => {
     setError('');
 
     try {
+      // SUBMIT LOGIN CREDENTIALS TO BACKEND
+      // Authenticate user and receive JWT token
       const response = await authAPI.login(formData.email, formData.password);
       
+      // STORE AUTH CREDENTIALS IN LOCALSTORAGE
+      // Save JWT token and user info for future authenticated requests
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       
